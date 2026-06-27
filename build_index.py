@@ -7,7 +7,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 
 BASE_DIR = Path(__file__).resolve().parent
-PDF_PATH = BASE_DIR / "data" / "igidr_library_details.pdf"
+PDF_PATH = BASE_DIR / "data" / "iimb_library_details.pdf"
 INDEX_PATH = BASE_DIR / "faiss_index"
 
 if not PDF_PATH.exists():
