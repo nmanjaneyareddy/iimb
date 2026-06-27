@@ -8,7 +8,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 
 BASE_DIR = Path(__file__).resolve().parent
-PDF_PATH = BASE_DIR / "data" / "igidr_library_details.pdf"
+PDF_PATH = BASE_DIR / "data" / "iimb_library_details.pdf"
 
 @st.cache_resource(show_spinner="Loading PDF and building vector index...")
 def load_or_create_vector_store():
