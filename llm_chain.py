@@ -1,59 +1,75 @@
-import os
+# llm_chain.py
 import streamlit as st
-from typing import Any, Dict, List
+from typing import Dict, Any, List
+
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 
-DEFAULT_MODEL = "deepseek-chat"
-DEFAULT_BASE_URL = "https://api.deepseek.com/v1"
-
-def _get_secret(name):
-    try:
-        return st.secrets.get(name)
-    except Exception:
-        return None
 
 def _make_llm():
-    deepseek_key = _get_secret("DEEPSEEK_API_KEY") or os.getenv("DEEPSEEK_API_KEY")
-    openai_key = _get_secret("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
+    api_key = st.secrets.get("DEEPSEEK_API_KEY") or st.secrets.get("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError("Missing OPENAI_API_KEY or DEEPSEEK_API_KEY in Streamlit secrets")
 
-    if deepseek_key:
-        return ChatOpenAI(model=DEFAULT_MODEL, temperature=0.2, max_tokens=512, api_key=deepseek_key, base_url=DEFAULT_BASE_URL)
-    if openai_key:
-        return ChatOpenAI(model="gpt-4o-mini", temperature=0.2, max_tokens=512, api_key=openai_key)
-    raise RuntimeError("Missing DEEPSEEK_API_KEY or OPENAI_API_KEY in Streamlit secrets or environment variables")
+    return ChatOpenAI(
+        model="deepseek-chat",
+        temperature=0.2,
+        max_tokens=512,
+        api_key=api_key,
+        base_url="https://api.deepseek.com/v1",
+    )
+
 
 class SimpleRetrievalQA:
-    def __init__(self, retriever, llm, k=4):
+    """
+    Minimal, stable Retrieval-QA implementation.
+    No langchain.chains usage.
+    """
+
+    def __init__(self, retriever, llm, k: int = 4):
         self.retriever = retriever
         self.llm = llm
         self.k = k
+
         self.prompt = PromptTemplate(
             input_variables=["context", "question"],
-            template="Use the context to answer clearly and concisely. If the answer is not in the context, say you do not know.\n\nContext:\n{context}\n\nQuestion:\n{question}\n\nAnswer:",
+            template=(
+                "Use the following context to answer the question clearly and concisely.\n\n"
+                "Context:\n{context}\n\n"
+                "Question:\n{question}\n\n"
+                "Answer:"
+            ),
         )
 
     def invoke(self, inputs: Dict[str, Any]) -> Dict[str, str]:
-        question = inputs.get("input") or inputs.get("question") or inputs.get("query")
+        question = inputs.get("input") or inputs.get("question")
         if not question:
             return {"answer": ""}
 
-        if hasattr(self.retriever, "invoke"):
-            docs = self.retriever.invoke(question)
-        else:
-            docs = self.retriever.get_relevant_documents(question)
-        docs = docs[: self.k]
+        docs = self.retriever.get_relevant_documents(question)[: self.k]
 
-        context_parts: List[str] = [getattr(doc, "page_content", "") for doc in docs]
-        context = "\n\n".join([part for part in context_parts if part])
+        context_parts: List[str] = []
+        for d in docs:
+            text = getattr(d, "page_content", None)
+            if text:
+                context_parts.append(text)
+
+        context = "\n\n".join(context_parts)
         prompt_text = self.prompt.format(context=context, question=question)
-        response = self.llm.invoke(prompt_text)
-        answer = getattr(response, "content", str(response))
+
+        if hasattr(self.llm, "invoke"):
+            answer = self.llm.invoke(prompt_text).content
+        else:
+            answer = self.llm.predict(prompt_text)
+
         return {"answer": answer}
 
-def setup_qa_chain(vectorstore, k=4):
+
+def setup_qa_chain(vectorstore, k: int = 4):
     if vectorstore is None:
         raise ValueError("vectorstore cannot be None")
+
     llm = _make_llm()
     retriever = vectorstore.as_retriever(search_kwargs={"k": k})
+
     return SimpleRetrievalQA(retriever, llm, k=k)
