@@ -62,7 +62,7 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-question = st.chat_input("Ask a question about the IGIDR library...")
+question = st.chat_input("Ask a question about the IIMB library...")
 
 if question:
     st.session_state.messages.append(
