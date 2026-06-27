@@ -7,7 +7,7 @@ from langchain_core.prompts import PromptTemplate
 
 
 def _make_llm():
-    api_key = st.secrets.get("sk-f35d6e0d587f4541b479c91ee9388dcd") or st.secrets.get("OPENAI_API_KEY")
+    api_key = st.secrets.get("DEEPSEEK_API_KEY") or st.secrets.get("OPENAI_API_KEY")
     if not api_key:
         raise RuntimeError("Missing OPENAI_API_KEY or DEEPSEEK_API_KEY in Streamlit secrets")
 
