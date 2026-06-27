@@ -42,11 +42,11 @@ class SimpleRetrievalQA:
         )
 
     def invoke(self, inputs: Dict[str, Any]) -> Dict[str, str]:
-        question = inputs.get("input") or inputs.get("question")
-        if not question:
-            return {"answer": ""}
+    question = inputs.get("input") or inputs.get("question")
+    if not question:
+        return {"answer": ""}
 
-        docs = self.retriever.get_relevant_documents(question)[: self.k]
+    docs = self.retriever.invoke(question)[: self.k]
 
         context_parts: List[str] = []
         for d in docs:
