@@ -31,7 +31,7 @@ class SimpleRetrievalQA:
         self.llm = llm
         self.k = k
         self.prompt = PromptTemplate(
-            input_variables=["context", "question"],
+            input_variables=["chat_history", "context", "question"],
             template=(
                 "You are a friendly and helpful IGIDR Library Assistant. "
                 "Answer the user's question using only the context below. "
