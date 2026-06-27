@@ -5,13 +5,13 @@ from vectorstore import load_or_create_vector_store
 from llm_chain import setup_qa_chain
 
 st.set_page_config(
-    page_title="IGIDR Library Assistant",
+    page_title="IIMB Library Assistant",
     page_icon="📚",
     layout="wide"
 )
 
-st.title("📚 IGIDR Library Assistant")
-st.caption("Ask questions about the IGIDR library PDF. I can also return links if they are present in the document.")
+st.title("📚 IIMB Library Assistant")
+st.caption("Ask questions about the IIMB library PDF. I can also return links if they are present in the document.")
 
 with st.sidebar:
     st.header("Settings")
@@ -52,7 +52,7 @@ if "messages" not in st.session_state:
         {
             "role": "assistant",
             "content": (
-                "Hi! I’m your IGIDR Library Assistant. "
+                "Hi! I’m your IIMB Library Assistant. "
                 "Ask me anything about the library PDF, including services, timings, rules, or useful links."
             ),
         }
