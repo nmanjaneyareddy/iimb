@@ -34,8 +34,7 @@ class SimpleRetrievalQA:
         self.prompt = PromptTemplate(
             input_variables=["context", "question"],
             template=(
-                "Use the following context to answer the question clearly and concisely. "
-                "If the answer is not in the context, say you do not know.\n\n"
+                "Use the following context to answer the question clearly and concisely.\n\n"
                 "Context:\n{context}\n\n"
                 "Question:\n{question}\n\n"
                 "Answer:"
@@ -43,16 +42,11 @@ class SimpleRetrievalQA:
         )
 
     def invoke(self, inputs: Dict[str, Any]) -> Dict[str, str]:
-        question = inputs.get("input") or inputs.get("question") or inputs.get("query")
+        question = inputs.get("input") or inputs.get("question")
         if not question:
             return {"answer": ""}
 
-        if hasattr(self.retriever, "invoke"):
-            docs = self.retriever.invoke(question)
-        else:
-            docs = self.retriever.get_relevant_documents(question)
-
-        docs = docs[: self.k]
+        docs = self.retriever.get_relevant_documents(question)[: self.k]
 
         context_parts: List[str] = []
         for d in docs:
@@ -64,8 +58,7 @@ class SimpleRetrievalQA:
         prompt_text = self.prompt.format(context=context, question=question)
 
         if hasattr(self.llm, "invoke"):
-            response = self.llm.invoke(prompt_text)
-            answer = getattr(response, "content", str(response))
+            answer = self.llm.invoke(prompt_text).content
         else:
             answer = self.llm.predict(prompt_text)
 
