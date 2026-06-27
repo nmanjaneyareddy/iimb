@@ -34,11 +34,13 @@ class SimpleRetrievalQA:
         self.prompt = PromptTemplate(
             input_variables=["context", "question"],
             template=(
-                "Use the following context to answer the question clearly and concisely.\n\n"
+                "Use the following context to answer the question clearly and concisely. "
+                "If the context contains links or URLs relevant to the answer, include them exactly as written. "
+                "If the answer is not in the context, say you do not know.\n\n"
                 "Context:\n{context}\n\n"
                 "Question:\n{question}\n\n"
                 "Answer:"
-            ),
+             ),
         )
 
     def invoke(self, inputs: Dict[str, Any]) -> Dict[str, str]:
